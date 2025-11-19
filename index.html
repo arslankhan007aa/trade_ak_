@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>AK Trade — Full System</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body{
+  background: linear-gradient(180deg,#001F3F,#000);
+  color:#fff;
+  font-family:sans-serif;
+  margin:0;
+  padding-bottom:90px;
+}
+
+/* Card / Box */
+.box{
+  background:rgba(0,0,0,0.45);
+  backdrop-filter:blur(6px);
+  padding:20px;
+  border-radius:14px;
+  margin:15px;
+  box-shadow:0 0 12px #00A8FF55;
+}
+
+/* Inputs */
+input, select{
+  width:100%;
+  padding:12px;
+  border-radius:10px;
+  border:1px solid #00A8FF;
+  background:#00111F;
+  color:#fff;
+  margin-top:10px;
+}
+input[type="file"]{
+    border: none;
+    padding: 0;
+    margin-top: 15px;
+}
+
+/* ================================================= */
+/* *** BUTTON STYLING CHANGES *** */
+/* ================================================= */
+button{
+  width:100%;
+  padding:14px; /* Slightly more padding */
+  background:#00A8FF;
+  color:#fff;
+  border:none;
+  border-radius:12px; /* Slightly more rounded */
+  margin-top:12px; /* Slightly more margin */
+  font-size:17px;
+  font-weight:700; /* Bolder text */
+  box-shadow:0 4px 15px rgba(0, 168, 255, 0.4); /* Better shadow */
+  transition: all 0.2s ease-in-out; /* Smooth transition for hover effects */
+  cursor: pointer;
+}
+/* Hover effect: lift and darken */
+button:hover {
+    background: #007BFF;
+    box-shadow: 0 6px 20px rgba(0, 123, 255, 0.6);
+    transform: translateY(-2px);
+}
+/* Active effect: press down */
+button:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 10px rgba(0, 168, 255, 0.3);
+}
+
+h2{ 
+  color:#00C8FF; 
+  font-weight:700;
+  margin-top: 0;
+}
+/* Plan Buy Button - Greenish tone for buying */
+.plan-btn {
+    background: #00AA00; 
+    box-shadow: 0 4px 15px rgba(0, 170, 0, 0.4);
+}
+.plan-btn:hover {
+    background: #008800;
+    box-shadow: 0 6px 20px rgba(0, 136, 0, 0.6);
+}
+
+/* History List Styling */
+.history-list {
+    list-style: none;
+    padding: 0;
+}
+.history-list li {
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+.history-withdraw-pending { background: #3f0a0a; border-left: 5px solid #FF0000; }
+.history-withdraw-completed { background: #0a3f0a; border-left: 5px solid #00FF00; }
+.history-deposit-pending { background: #3f3f0a; border-left: 5px solid #FFFF00; }
+.history-deposit-completed { background: #0a3f0a; border-left: 5px solid #00FF00; }
+.history-deposit-rejected { background: #3f0a0a; border-left: 5px solid #FF0000; }
+
+
+/* Bottom Navbar */
+nav{
+text-align:center;
+padding:18px 0;
+background:#000;
+position:fixed;
+bottom:0;
+left:0;
+right:0;
+z-index:999;
+box-shadow:0 -3px 10px #00A8FF55;
+}
+nav a{
+color:#00C8FF;
+margin:0 14px;
+font-size:18px;
+text-decoration:none;
+font-weight:600;
+}
+nav .channelBtn{
+  color:#fff;
+  background:#00A8FF;
+  padding:6px 12px;
+  border-radius:8px;
+}
+.hidden{ display:none; }
+</style>
+</head>
+<body onload="checkUserStatus()">
+
+<div id="loginPage">
+  <div class="box">
+    <h2>Login 🔑</h2>
+    <button onclick="showSignup()">Create Account</button>
+    <input id="loginUser" placeholder="Username">
+    <input id="loginPass" placeholder="Password" type="password">
+    <button onclick="login()">Login</button>
+  </div>
+</div>
+
+<div id="signupPage" class="hidden">
+  <div class="box">
+    <h2>Create Account ✍️</h2>
+    <p style="color:#00C8FF;">**Bonus:** Joining پر 10 Rs Balance मिलेगा!</p>
+    <input id="newUser" placeholder="Username">
+    <input id="newPass" placeholder="Password" type="password">
+
+    <input id="refBy" placeholder="Referral Username (Optional)">
+    <button onclick="signup()">Create Account</button>
+
+    <button onclick="showLogin()">Back to Login</button>
+  </div>
+</div>
+
+<div id="dashboard" class="hidden">
+
+<div class="box">
+  <h2>Dashboard 🏠</h2>
+  <p id="welcome"></p>
+  <p id="bal">Balance: 0 Rs</p>
+  <p id="planName">Active Plan: None</p>
+  <p id="planExpiry">Plan Expiry: —</p>
+</div>
+
+<div id="history" class="box hidden">
+    <h2>Transaction Records 📜</h2>
+    <ul id="historyList" class="history-list">
+        <li>Loading history...</li>
+    </ul>
+</div>
+<div id="deposit" class="box hidden">
+  <h2>Deposit 💸</h2>
+  
+  <p style="color:#00C8FF;">**Note:** First buy a plan in the 'Plan' section to see the deposit amount.</p>
+
+  <select id="depositType">
+    <option>JazzCash</option>
+    <option>Easypaisa</option>
+  </select>
+
+  <input id="depositAmount" placeholder="Enter Deposit Amount (Auto-filled by Plan)">
+
+  <p style="margin-top:10px;">Upload Payment Screenshot:</p>
+  <input type="file" id="ssUpload" accept="image/*">
+
+  <p style="margin-top:15px;background:#00111F;padding:12px;border-radius:10px;">
+    Pay to: <b>03046416033 (Ghulam Ruqayya)</b>
+  </p>
+
+  <button onclick="depositReq()">Submit Deposit</button>
+</div>
+
+<div id="withdraw" class="box hidden">
+  <h2>Withdraw 🏧</h2>
+  <p style="color:yellow;">Available Balance: <b id="availableBal">0 Rs</b></p>
+  
+  <select id="widType">
+    <option>JazzCash</option>
+    <option>Easypaisa</option>
+  </select>
+  <input id="widNum" placeholder="Your Number">
+  <input id="widName" placeholder="Your Name">
+  <input id="widAmount" placeholder="Amount (Min 10 Rs)">
+  <button onclick="withdrawReq()">Submit Withdraw</button>
+</div>
+
+<div id="task" class="box hidden">
+  <h2>Daily Task ⭐</h2>
+  <div id="taskContent">
+    <p>Watch this TikTok video:</p>
+    <a href="https://www.tiktok.com" style="color:#00A8FF;" target="_blank">Open Task Link</a>
+    <button onclick="completeTask()">Complete Task</button>
+  </div>
+</div>
+
+<div id="referral" class="box hidden">
+  <h2>Referral 🧑‍🤝‍🧑</h2>
+  <p>Your Username: <b id="refName"></b></p>
+  <p>Your Referral Link:</p>
+  <p style="background:#00111F;padding:10px;border-radius:8px;">
+    aktrade.com/?ref=<span id="refLink"></span>
+  </p>
+</div>
+
+<div id="plan" class="box hidden">
+  <h2>Plans 💎</h2>
+
+  <div style="background:#00111F;padding:12px;border-radius:12px;margin-bottom:12px;">
+    <b>Plan 1:</b> Deposit 200 → Daily 10Rs → 50 Days    
+    <button class="plan-btn" onclick="selectPlan(200,10, 'Plan 1')">Buy Plan 1</button>
+  </div>
+
+  <div style="background:#00111F;padding:12px;border-radius:12px;margin-bottom:12px;">
+    <b>Plan 2:</b> Deposit 600 → Daily 35Rs → 50 Days    
+    <button class="plan-btn" onclick="selectPlan(600,35, 'Plan 2')">Buy Plan 2</button>
+  </div>
+
+  <div style="background:#00111F;padding:12px;border-radius:12px;margin-bottom:12px;">
+    <b>Plan 3:</b> Deposit 1200 → Daily 80Rs → 50 Days    
+    <button class="plan-btn" onclick="selectPlan(1200,80, 'Plan 3')">Buy Plan 3</button>
+  </div>
+
+</div>
+
+<div id="profile" class="box hidden">
+  <h2>Profile 👤</h2>
+  <p>Username: <b id="proUser"></b></p>
+  <p>Balance: <b id="proBal"></b></p>
+  <button onclick="logout()">Logout</button>
+</div>
+
+</div>
+
+<nav id="navBar" class="hidden">
+  <a onclick="showSection('history')">History</a> <a onclick="showSection('deposit')">Deposit</a>
+  <a onclick="showSection('withdraw')">Withdraw</a>
+  <a onclick="showSection('task')">Task</a>
+  <a onclick="showSection('referral')">Referral</a>
+  <a onclick="showSection('plan')">Plan</a>
+  <a onclick="showSection('profile')">Profile</a>
+  <a class="channelBtn" href="https://whatsapp.com/channel/0029Vb6rV2aL7UVYj5WZvi3y" target="_blank">Channel</a>
+</nav>
+
+
+<script>
+// --- Initial Check ---
+function checkUserStatus() {
+    if (localStorage.getItem("currentUser")) {
+        loadDashboard();
+    } else {
+        showLogin();
+    }
+}
+
+// --- Helper to get all withdrawal requests ---
+function getWithdrawalRequests(){
+    return JSON.parse(localStorage.getItem("withdrawalRequests") || "[]");
+}
+
+/* ================== SIGNUP (SECURED) - MODIFIED: Referral is now OPTIONAL ================== */
+function signup(){
+  let u = newUser.value.trim();
+  let p = newPass.value.trim();
+  let r = refBy.value.trim(); // Referral username
+
+  // MODIFIED: Only Username and Password are REQUIRED now. Referral (r) is optional.
+  if(!u || !p) 
+      return alert("Username and Password are required.");
+
+  if(r) {
+      // Check if referral user exists ONLY if a referral is provided
+      if(!localStorage.getItem("user_"+r) && r !== "admin")
+          return alert("Referral username does NOT exist in the system!");
+  }
+
+  if(localStorage.getItem("user_"+u))
+      return alert("User already exists");
+
+  localStorage.setItem("user_"+u, JSON.stringify({
+    pass:p,
+    bal:10, 
+    plan:null,
+    daily:0,
+    planExpiry:null,
+    ref:r || null, // Store referral if provided, otherwise null
+    pendingDeposit: null, 
+    adminApproved:false,
+    tasksDone:0,
+    lastTaskDay:null
+  }));
+
+  alert("Account created successfully! 10 Rs Bonus Added. Please Login.");
+  showLogin();
+}
+
+/* ================== LOGIN (SECURED) ================== */
+function login(){
+  let u = loginUser.value.trim();
+  let p = loginPass.value.trim();
+
+  let data = localStorage.getItem("user_"+u);
+  
+  // Check 1: User existence
+  if(!data) return alert("Login Failed: Incorrect Username or Password.");
+
+  let d = JSON.parse(data);
+  
+  // Check 2: Password match
+  if(d.pass !== p) return alert("Login Failed: Incorrect Username or Password.");
+
+  localStorage.setItem("currentUser",u);
+  loadDashboard();
+}
+
+/* ================== LOAD DASHBOARD ================== */
+function loadDashboard(){
+  let u = localStorage.getItem("currentUser");
+  let d = JSON.parse(localStorage.getItem("user_"+u));
+
+  // --- Check Admin Approval for Plan Activation ---
+  if(d.adminApproved && d.pendingDeposit){
+      activatePlanNow(u);
+      d = JSON.parse(localStorage.getItem("user_"+u)); // Reload data after activation
+  }
+  
+  // --- Update Dashboard UI ---
+  welcome.innerHTML = "Welcome, <b>" + u + "</b>";
+  bal.innerHTML = "Balance: <b>" + d.bal + " Rs</b>";
+  planName.innerHTML = "Active Plan: <b>" + (d.plan ? d.plan : "None") + "</b>";
+  planExpiry.innerHTML = "Plan Expiry: <b>" + (d.planExpiry ? d.planExpiry : "—") + "</b>";
+
+  refName.innerHTML = u;
+  refLink.innerHTML = u;
+
+  proUser.innerHTML = u;
+  proBal.innerHTML = d.bal + " Rs";
+  availableBal.innerHTML = d.bal + " Rs";
+  
+  // Update Deposit Amount field if a plan is pending
+  if (d.pendingDeposit) {
+    document.getElementById('depositAmount').value = d.pendingDeposit.amount;
+    document.getElementById('depositAmount').setAttribute('readonly', 'readonly');
+  } else {
+    document.getElementById('depositAmount').value = '';
+    document.getElementById('depositAmount').removeAttribute('readonly');
+  }
+
+
+  loginPage.classList.add("hidden");
+  signupPage.classList.add("hidden");
+  dashboard.classList.remove("hidden");
+  navBar.classList.remove("hidden");
+
+  // Show deposit section by default
+  showSection("history"); // Changed default section to history
+}
+
+/* ================== SHOW SECTIONS ================== */
+function showSection(sec){
+  // Added 'history' to the list of sections
+  ["deposit","withdraw","task","referral","plan","profile", "history"].forEach(id=>{
+    document.getElementById(id).classList.add("hidden");
+  });
+  document.getElementById(sec).classList.remove("hidden");
+  
+  // Load history data when section is shown
+  if (sec === 'history') {
+      displayHistory();
+  }
+}
+
+/* ================== DISPLAY HISTORY (NEW FUNCTION) ================== */
+function displayHistory() {
+    let u = localStorage.getItem("currentUser");
+    let d = JSON.parse(localStorage.getItem("user_" + u));
+    let historyList = document.getElementById("historyList");
+    historyList.innerHTML = '';
+    let foundRecords = false;
+
+    // 1. Withdrawal Records
+    let allWithdraws = getWithdrawalRequests();
+    let userWithdraws = allWithdraws.filter(w => w.user === u);
+
+    userWithdraws.sort((a, b) => b.id - a.id); // Latest first
+
+    userWithdraws.forEach(w => {
+        let statusText;
+        let className;
+
+        if (w.status === 'Pending') {
+            statusText = '<span style="color:yellow;">Pending...</span>';
+            className = 'history-withdraw-pending';
+        } else if (w.status === 'Completed') {
+            statusText = '<span style="color:lightgreen;">Completed</span>';
+            className = 'history-withdraw-completed';
+        } else if (w.status === 'Rejected') {
+            statusText = '<span style="color:red;">Rejected</span>';
+            className = 'history-withdraw-rejected';
+        }
+
+        let listItem = document.createElement("li");
+        listItem.className = className;
+        listItem.innerHTML = `
+            <strong>Type: Withdrawal</strong><br>
+            Amount: ${w.amount} Rs | Status: ${statusText}<br>
+            Account: ${w.number} (${w.type})<br>
+            Time: ${w.timestamp}
+        `;
+        historyList.appendChild(listItem);
+        foundRecords = true;
+    });
+    
+    // 2. Pending Deposit (Only visible if currently pending)
+    if (d.pendingDeposit) {
+        let dep = d.pendingDeposit;
+        let listItem = document.createElement("li");
+        listItem.className = 'history-deposit-pending';
+        listItem.innerHTML = `
+            <strong>Type: Deposit (Pending Plan)</strong><br>
+            Plan: ${dep.plan} | Amount: ${dep.amount} Rs<br>
+            Status: <span style="color:yellow;">Waiting for Admin Approval...</span><br>
+            Time: ${dep.date}
+        `;
+        historyList.appendChild(listItem);
+        foundRecords = true;
+    }
+
+    if (!foundRecords) {
+        historyList.innerHTML = '<li>No transaction records found.</li>';
+    }
+}
+/* ================== END DISPLAY HISTORY ================== */
+
+
+/* ================== PLAN SELECT ================== */
+function selectPlan(amount, dailyIncome, planName){
+  let u = localStorage.getItem("currentUser");
+  let d = JSON.parse(localStorage.getItem("user_"+u));
+
+  if (d.plan) 
+      return alert("You already have an active plan!");
+  if (d.pendingDeposit) 
+      return alert("You already have a deposit request pending approval! Check the Deposit section.");
+
+  // This structure is read by Admin Panel
+  d.pendingDeposit = {
+      plan: planName,
+      daily: dailyIncome,
+      amount: amount, 
+      method: null, 
+      screenshot: null, 
+      date: null 
+  };
+  d.adminApproved = false;
+
+  localStorage.setItem("user_"+u, JSON.stringify(d));
+
+  alert(`Plan selected (${planName}: ${amount} Rs). Now, please deposit to activate it.`);
+  loadDashboard(); // To update deposit input
+  showSection("deposit");
+}
+
+/* ================== DEPOSIT (with Screenshot) ================== */
+function depositReq(){
+  let u = localStorage.getItem("currentUser");
+  let d = JSON.parse(localStorage.getItem("user_"+u));
+  
+  let amount = depositAmount.value.trim();
+  let type = depositType.value;
+  let ssFile = ssUpload.files[0]; // Get the uploaded file
+
+  if(!d.pendingDeposit)
+      return alert("Please select a plan first from the 'Plan' section!");
+  if(d.pendingDeposit.amount != amount)
+      return alert("Deposit amount must match the selected plan amount (" + d.pendingDeposit.amount + " Rs).");
+  if(!ssFile)
+      return alert("Please upload the payment screenshot!");
+  
+  if(ssFile.size > 500000) 
+      return alert("Screenshot file is too large! Max 500KB allowed.");
+
+  // Convert screenshot to Base64 for Local Storage
+  let reader = new FileReader();
+  reader.onload = function(e){
+      d.pendingDeposit.method = type;
+      d.pendingDeposit.screenshot = e.target.result; 
+      d.pendingDeposit.date = new Date().toLocaleString();
+
+      localStorage.setItem("user_"+u, JSON.stringify(d));
+      alert("Deposit request sent!\nAdmin will approve soon.");
+      loadDashboard();
+  };
+  reader.readAsDataURL(ssFile);
+}
+
+/* ================== ADMIN AUTO APPROVAL ================== */
+function activatePlanNow(u){
+  let d = JSON.parse(localStorage.getItem("user_"+u));
+  
+  // Activate the plan using data stored in pendingDeposit
+  d.plan = d.pendingDeposit.plan;
+  d.daily = d.pendingDeposit.daily;
+
+  let now = new Date();
+  now.setDate(now.getDate()+50);
+  d.planExpiry = now.toDateString();
+
+  // --- Add completed deposit to history (Simulated record) ---
+  let withdrawalRequests = getWithdrawalRequests();
+  withdrawalRequests.push({
+      id: Date.now() + 1, // Unique ID
+      user: u,
+      type: 'Deposit',
+      number: d.pendingDeposit.plan, // Storing plan name here for history display
+      name: 'Plan Activation',
+      amount: d.pendingDeposit.amount,
+      status: 'Completed',
+      timestamp: d.pendingDeposit.date 
+  });
+  localStorage.setItem("withdrawalRequests", JSON.stringify(withdrawalRequests));
+  // --- End Simulated Deposit Record ---
+
+  delete d.pendingDeposit; // Remove the pending deposit object
+  d.adminApproved = false; // Reset flag
+
+  localStorage.setItem("user_"+u, JSON.stringify(d));
+  alert("Your plan has been activated (Admin Approved)!");
+}
+
+/* ================== WITHDRAW (with Limit Check) - MODIFIED ================== */
+function withdrawReq(){
+    let u = localStorage.getItem("currentUser");
+    let num = widNum.value.trim();
+    let name = widName.value.trim();
+    let amount = parseInt(widAmount.value.trim());
+    let type = widType.value;
+
+    let d = JSON.parse(localStorage.getItem("user_"+u));
+    
+    // --- Withdrawal Checks ---
+    // MODIFIED: Cannot withdraw without an active plan
+    if (!d.plan) return alert("Buy an active plan first to withdraw (10 Rs Joining Bonus is non-withdrawable without plan).");
+    
+    // MODIFIED: Minimum withdrawal is 10 Rs
+    if (isNaN(amount) || amount < 10) return alert("Minimum withdrawal is 10 Rs.");
+    
+    // Check 1: Balance Limit
+    if (amount > d.bal) 
+        return alert("Request Failed: Insufficient balance. You only have " + d.bal + " Rs.");
+    
+    if (!num || !name) return alert("Please enter account details.");
+
+    // --- Save Withdrawal Request (Admin Panel will read this) ---
+    let withdrawalRequests = getWithdrawalRequests();
+    
+    withdrawalRequests.push({
+        id: Date.now(),
+        user: u,
+        type: type,
+        number: num,
+        name: name,
+        amount: amount,
+        status: 'Pending',
+        timestamp: new Date().toLocaleString()
+    });
+    
+    // Deduct balance immediately
+    d.bal -= amount; 
+    
+    localStorage.setItem("user_"+u, JSON.stringify(d));
+    localStorage.setItem("withdrawalRequests", JSON.stringify(withdrawalRequests));
+
+    alert("Withdraw request sent!\n" + amount + " Rs deducted.");
+    loadDashboard();
+}
+
+/* ================== DAILY TASK + REFERRAL BONUS ================== */
+function completeTask(){
+  let u = localStorage.getItem("currentUser");
+  let d = JSON.parse(localStorage.getItem("user_"+u));
+
+  if(!d.plan) return alert("Buy a plan first to earn.");
+
+  let today = new Date().toDateString();
+
+  if(d.lastTaskDay !== today){
+    d.tasksDone = 0;
+    d.lastTaskDay = today;
+  }
+
+  if(d.tasksDone >= 1){
+    return alert("You can only complete 1 task daily!");
+  }
+
+  d.tasksDone += 1;
+  d.bal += d.daily;
+
+  /* REFERRAL BONUS: +10 Rs */
+  if(d.ref){
+     let refUser = d.ref;
+     // Make sure the referrer exists and is not the current user
+     if(localStorage.getItem("user_"+refUser) && refUser !== u){
+        let rd = JSON.parse(localStorage.getItem("user_"+refUser));
+        rd.bal += 10;
+        localStorage.setItem("user_"+refUser, JSON.stringify(rd));
+     }
+  }
+
+  localStorage.setItem("user_"+u, JSON.stringify(d));
+
+  alert("Task Completed! +" + d.daily + " Rs Added");
+
+  loadDashboard();
+}
+
+/* ================== LOGOUT ================== */
+function logout(){
+  localStorage.removeItem("currentUser");
+  location.reload();
+}
+
+/* ================== SWITCH PAGES ================== */
+function showSignup(){
+  loginPage.classList.add("hidden");
+  signupPage.classList.remove("hidden");
+}
+function showLogin(){
+  signupPage.classList.add("hidden");
+  loginPage.classList.remove("hidden");
+}
+</script>
+
+</body>
+</html>
